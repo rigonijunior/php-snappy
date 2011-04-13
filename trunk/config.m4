@@ -41,7 +41,7 @@ Make sure that the comment is aligned:
 
 dnl compiler C++:
 
-PHP_REQUIRE_CXX()
+dnl PHP_REQUIRE_CXX()
 
 dnl snappy include dir
 
@@ -59,7 +59,7 @@ if test "$PHP_SNAPPY" != "no"; then
     fi
   else
     SEARCH_PATH="/usr/local /usr"     # you might want to change this
-    SEARCH_FOR="/include/snappy.h"  # you most likely want to change this
+    SEARCH_FOR="/include/snappy-c.h"  # you most likely want to change this
     if test -r $PHP_SNAPPY/$SEARCH_FOR; then # path given as parameter
       SNAPPY_DIR="$PHP_SNAPPY/include"
     else # search default path list
@@ -90,9 +90,9 @@ if test "$PHP_SNAPPY" != "no"; then
   AC_LANG_CPLUSPLUS
   AC_TRY_COMPILE(
   [
-    #include "$SNAPPY_DIR/snappy.h"
+    #include "$SNAPPY_DIR/snappy-c.h"
   ],[
-    using namespace snappy;
+    snappy_max_compressed_length(1);
   ],[
     AC_MSG_RESULT(yes)
     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $SNAPPY_DIR/lib, SNAPPY_SHARED_LIBADD)
@@ -100,25 +100,6 @@ if test "$PHP_SNAPPY" != "no"; then
   ],[
     AC_MSG_RESULT([error])
     AC_MSG_ERROR([wrong snappy lib version or lib not found : $SNAPPY_DIR])
-  ])
-  AC_LANG_RESTORE
-
-  dnl # check for stdc++
-  LIBNAME=stdc++
-  AC_MSG_CHECKING([for stdc++])
-  AC_LANG_SAVE
-  AC_LANG_CPLUSPLUS
-  AC_TRY_COMPILE(
-  [
-    #include <string>
-    using namespace std;
-  ],[
-    string dummy;
-  ],[
-    AC_MSG_RESULT(yes)
-    PHP_ADD_LIBRARY($LIBNAME, , SNAPPY_SHARED_LIBADD)
-  ],[
-    AC_MSG_ERROR([wrong stdc++ lib version or lib not found])
   ])
   AC_LANG_RESTORE
 
@@ -131,5 +112,5 @@ if test "$PHP_SNAPPY" != "no"; then
     PHP_ADD_MAKEFILE_FRAGMENT
   ])
 
-  PHP_NEW_EXTENSION(snappy, snappy.cc, $ext_shared)
+  PHP_NEW_EXTENSION(snappy, snappy.c, $ext_shared)
 fi
