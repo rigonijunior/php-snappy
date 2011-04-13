@@ -1,5 +1,9 @@
 snappy extension changelog
 
+Version 0.0.2
+-------------
+	* Updated use C bindings of Snappy.
+
 Version 0.0.1
 -------------
 	* Initial release.

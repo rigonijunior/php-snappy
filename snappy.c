@@ -3,15 +3,13 @@
 #include "config.h"
 #endif
 
-extern "C" {
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_snappy.h"
-}
 
 /* snappy */
-#include "snappy.h"
+#include "snappy-c.h"
 
 static PHP_FUNCTION(snappy_compress);
 static PHP_FUNCTION(snappy_uncompress);
@@ -71,16 +69,22 @@ static PHP_FUNCTION(snappy_compress)
         return;
     }
 
-    output = (char *)emalloc(snappy::MaxCompressedLength(data_len));
+    output_len = snappy_max_compressed_length(data_len);
+    output = (char *)emalloc(output_len);
     if (!output)
     {
         zend_error(E_WARNING, "snappy_compress : memory error");
         RETURN_FALSE;
     }
 
-    snappy::RawCompress(data, data_len, output, &output_len);
-
-    RETVAL_STRINGL(output, output_len, 1);
+    if (snappy_compress(data, data_len, output, &output_len) == SNAPPY_OK)
+    {
+        RETVAL_STRINGL(output, output_len, 1);
+    }
+    else
+    {
+        RETVAL_FALSE;
+    }
 
     efree(output);
 }
@@ -97,7 +101,8 @@ static PHP_FUNCTION(snappy_uncompress)
         return;
     }
 
-    if (!snappy::GetUncompressedLength(data, (size_t)data_len, &output_len))
+    if (snappy_uncompressed_length(
+            data, (size_t)data_len, &output_len) != SNAPPY_OK)
     {
         zend_error(E_WARNING, "snappy_uncompress : output length error");
         RETURN_FALSE;
@@ -110,7 +115,7 @@ static PHP_FUNCTION(snappy_uncompress)
         RETURN_FALSE;
     }
 
-    if (snappy::RawUncompress(data, data_len, output))
+    if (snappy_uncompress(data, data_len, output, &output_len) == SNAPPY_OK)
     {
         RETVAL_STRINGL(output, output_len, 1);
     }
