@@ -1,0 +1,14 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("snappy", "for snappy support", "yes");
+
+if (PHP_SNAPPY != "no") {
+    if (CHECK_LIB("snappy.lib", "snappy", PHP_SNAPPY) &&
+        CHECK_HEADER_ADD_INCLUDE("snappy-c.h", "CFLAGS", "..\\snappy;" + php_usual_include_suspects)) {
+        EXTENSION("snappy", "snappy.c", PHP_SNAPPY_SHARED, "");
+    } else {
+        WARNING("snappy support can't be enabled, snappy is missing")
+        PHP_SNAPPY = "no"
+    }
+}
